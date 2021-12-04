@@ -76,8 +76,42 @@ def create_task():
     
 
 def update_task(id: int):
-    ...
+   
+    task_to_update = Tasks.query.get(id)
+
+    if not task_to_update:
+        return {'msg': 'task not found'}
+
+    data = request.get_json()
+
+    data['urgency'] = task_to_update.urgency if "urgency" not in data else data['urgency']
+    data['importance'] = task_to_update.importance if "importance" not in data else data['importance']
     
+    priority = define_priority(data['importance'], data['urgency'])
+    
+    eisenhower = Eisenhowers.query.filter_by(type=priority).first()
+    data['eisenhower_id'] = eisenhower.id
+
+    task_to_update = Tasks.query.filter_by(id=id).update(data)
+    current_app.db.session.commit()
+
+    task_to_update = Tasks.query.filter_by(id=id).first()
+
+    return jsonify({
+        "id": task_to_update.id,
+        "name": task_to_update.name,
+        "description": task_to_update.description,
+        "duration": task_to_update.duration,
+        "eisenhower_classification": eisenhower.type
+    })
+
 
 def delete_task(id: int):
-    ...
+    task_to_delete = Tasks.query.get(id)
+
+    if not task_to_delete:
+        return {'msg': 'task not found'}
+
+    current_app.db.session.delete(task_to_delete)
+    current_app.db.session.commit()
+    return "", 204

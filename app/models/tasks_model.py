@@ -30,8 +30,6 @@ class Tasks(db.Model):
 
     @validates('importance', 'urgency')
     def validate_priorities(self, key, value):
-
         if value != 1 and value != 2:
             raise PrioritiesError()
-
         return value
