@@ -50,17 +50,16 @@ def delete_category(id: int):
 
 
 def get_all():
-    query = db.session.query(Categories, Tasks, Eisenhowers).select_from(Categories).join(tasks_categories).join(Tasks).join(Eisenhowers).all()
+    categories_all = Categories.query.all()
 
-    for category, task, eisenhower in query:
-        return jsonify([{
-            "id": category.id,
-            "name": category.name,
-            "description": category.description,
-            "tasks": [{
-                "id": task.id,
-                "name": task.name,
-                "description": task.description,
-                "priority": eisenhower.type
-            } for category.id, task.id, eisenhower.type in query] 
-        }])
+    return jsonify([{
+        "id": category.id,
+        "name": category.name,
+        "description": category.description,
+        "tasks": [{
+            "id": task.id,
+            "name": task.name,
+            "description": task.description,
+            "priority": task.eisenhower.type
+        } for task in category.tasks] 
+    } for category in categories_all])
